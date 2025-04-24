@@ -21,6 +21,8 @@ ADDR
     The target Bluetooth device address. (e.g. XX:XX:XX:XX:XX:XX)
 JSON_FILE
     The output file for exported scan data.
-# Installation
+```
 
-# About
+## Installation
+
+## About
