@@ -10,13 +10,13 @@ You can filter scan results, inspect devices in detail, and log their activity f
 ```text
 peek <COMMAND> [OPTIONS]...
 COMMAND
-    scan
-    info    <ADDR>
-    export   [JSON_FILE]
+    scan                  Scan nearby Bluetooth devices
+    info    <ADDR>        Show device information
+    export   [JSON_FILE]  Export results
 OPTIONS
-    -rand      Random address only.
-    -pub       Public address only.
-    -lim <INT> Limit the number of displayed devices.
+    -rand                 Random address only.
+    -pub                  Public address only.
+    -lim <INT>            Limit the number of displayed devices.
 ADDR
     The target Bluetooth device address. (e.g. XX:XX:XX:XX:XX:XX)
 JSON_FILE
