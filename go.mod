@@ -1,3 +1,3 @@
 module github.com/ozsys/peekbt
 
-go 1.24.2
+go 1.16
