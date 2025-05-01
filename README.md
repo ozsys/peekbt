@@ -1,6 +1,7 @@
 # peekbt
 A command-line tool for Bluetooth devices discovery, connection handling, and activity tracking.
-
+[![Go Report Card](https://goreportcard.com/badge/github.com/ozsys/peekbt)](https://goreportcard.com/report/github.com/ozsys/peekbt)
+[![Coverage Status](https://coveralls.io/repos/github/ozsys/peekbt/badge.svg?branch=main)](https://coveralls.io/github/ozsys/peekbt?branch=main)
 ## Overview
 peekbt is a command-line tool that allows you to scan, observe, and interact with Bluetooth devices around you.  
 It is designed for use on Linux-based systems (including Raspberry Pi) and supports both Classic Bluetooth and BLE (Bluetooth Low Energy).  
