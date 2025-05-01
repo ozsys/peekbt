@@ -22,7 +22,7 @@ jobs:
       - name: Setup Just
         uses: extractions/setup-just@v3
         with:
-          just-version: "1.40.0"
+          just-version: '1.40.0'
 
       - name: Checkout
         uses: actions/checkout@v4
