@@ -14,11 +14,11 @@ peek <COMMAND> [OPTIONS]...
 COMMAND
     scan                  Scan nearby Bluetooth devices
     info    <ADDR>        Show device information
-    export   [JSON_FILE]  Export results
+    export  [JSON_FILE]   Export results
 OPTIONS
     -rand                 Random address only.
     -pub                  Public address only.
-    -lim <INT>            Limit the number of displayed devices.
+    -lim    <INT>         Limit the number of displayed devices.
 ADDR
     The target Bluetooth device address. (e.g. XX:XX:XX:XX:XX:XX)
 JSON_FILE

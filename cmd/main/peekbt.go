@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"github.com/spf13/pflag"
 )
 
 func hello() string {
@@ -10,6 +11,7 @@ func hello() string {
 }
 
 func goMain(args []string) int {
+	commands.Execute(args)
 	fmt.Println(hello())
 	return 0
 }
