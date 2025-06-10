@@ -11,7 +11,10 @@ func hello() string {
 }
 
 func goMain(args []string) int {
-	commands.Execute(args)
+	if err := commands.Execute(args); err != nil {
+		fmt.Println(err) // Usageヘルプなどの出力
+		return 1
+	}
 	fmt.Println(hello())
 	return 0
 }
