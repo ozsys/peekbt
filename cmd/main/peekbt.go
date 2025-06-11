@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"github.com/spf13/pflag"
+	"github.com/ozsys/peekbt/cmd/main/commands"
 )
 
 func hello() string {
