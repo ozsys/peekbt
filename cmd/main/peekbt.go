@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"github.com/spf13/pflag"
+
 	"github.com/ozsys/peekbt/cmd/main/commands"
 )
 
@@ -16,7 +16,6 @@ func goMain(args []string) int {
 		fmt.Println(err) // Usageヘルプなどの出力
 		return 1
 	}
-	fmt.Println(hello())
 	return 0
 }
 
