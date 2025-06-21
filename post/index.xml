@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on PEEKBT</title>
+    <link>https://ozsys.github.io/peekbt/post/</link>
+    <description>Recent content in Posts on PEEKBT</description>
+    <generator>Hugo</generator>
+    <language>ja</language>
+    <managingEditor>youremail@domain.com (Some Person)</managingEditor>
+    <webMaster>youremail@domain.com (Some Person)</webMaster>
+    <atom:link href="https://ozsys.github.io/peekbt/post/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title></title>
+      <link>https://ozsys.github.io/peekbt/post/2025-06-20-how-to-use-scan/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><author>youremail@domain.com (Some Person)</author>
+      <guid>https://ozsys.github.io/peekbt/post/2025-06-20-how-to-use-scan/</guid>
+      <description></description>
+    </item>
+  </channel>
+</rss>
