@@ -13,7 +13,11 @@ jobs:
           - ubuntu-latest
           - macOS-latest
           - windows-latest
+
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -24,19 +28,23 @@ jobs:
         with:
           just-version: '1.40.0'
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      # Ubuntu だけテスト＆coverage出力
+      - name: Run tests & generate coverage
+        if: matrix.os == 'ubuntu-latest'
+        run: just test
 
+      # coverage.out がある場合のみ LCOV に変換
       - name: Convert Coverage Format to LCOV
+        if: matrix.os == 'ubuntu-latest'
         uses: jandelgado/gcov2lcov-action@v1.0.0
         with:
           infile: coverage.out
           outfile: coverage.lcov
-        if: "matrix.os == 'ubuntu-latest'"
 
       - name: Coveralls
+        if: matrix.os == 'ubuntu-latest'
         uses: coverallsapp/github-action@v1.0.1
         with:
-          github-token: ${{ secrets.github_token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.lcov
-        if: "matrix.os == 'ubuntu-latest'"
+          
