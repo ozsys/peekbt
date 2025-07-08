@@ -11,8 +11,8 @@ func hello() string {
 	return "Welcome to peekbt!"
 }
 
-func goMain(args []string) int {
-	if err := commands.Execute(args); err != nil {
+func goMain() int {
+	if err := commands.Execute(); err != nil {
 		fmt.Println(err) // Usageヘルプなどの出力
 		return 1
 	}
@@ -20,6 +20,6 @@ func goMain(args []string) int {
 }
 
 func main() {
-	status := goMain(os.Args)
+	status := goMain()
 	os.Exit(status)
 }

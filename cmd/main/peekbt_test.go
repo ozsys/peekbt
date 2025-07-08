@@ -1,9 +1,12 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
-func Example_() {
-	goMain([]string{"peekbt!"})
+func Example_hello() {
+	fmt.Println(hello())
 	// Output:
 	// Welcome to peekbt!
 }

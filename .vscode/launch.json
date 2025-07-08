@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug peekbt scan",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/main/peekbt.go",
+      "args": ["scan", "-t", "10"]
+    },
+    {
+      "name": "Debug peekbt info",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/main/peekbt.go",
+      "args": ["info", "-t", "5", "--json", "test.json", "58:e6:96:fd:d2:72"]
+    }
+  ]
+}

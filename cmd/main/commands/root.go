@@ -15,10 +15,8 @@ var rootCommand = &cobra.Command{
 	},
 }
 
-func Execute(args []string) error {
+// Execute runs the root command and handles subcommands.
+func Execute() error {
 	rootCommand.SetOut(os.Stdout)
-	if err := rootCommand.ParseFlags(args); err != nil {
-		return err
-	}
 	return rootCommand.Execute()
 }
