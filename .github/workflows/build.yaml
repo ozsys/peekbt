@@ -9,34 +9,41 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macOS-latest
-          - windows-latest
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
     steps:
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.16
+      - uses: actions/checkout@v4
 
-      - name: Setup Just
-        uses: extractions/setup-just@v3
+      - uses: actions/setup-go@v5
         with:
-          just-version: '1.40.0'
+          go-version: 1.23
 
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: extractions/setup-just@v3
+        with:
+          just-version: "1.40.0"
+
+      # Linux ランナーのみ BlueZ 開発ヘッダを導入
+      - name: Install BlueZ headers
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libbluetooth-dev
+
+      # Linux だけテスト＋カバレッジ
+      - name: Run tests & generate coverage
+        if: runner.os == 'Linux'
+        run: just test
 
       - name: Convert Coverage Format to LCOV
+        if: runner.os == 'Linux'
         uses: jandelgado/gcov2lcov-action@v1.0.0
         with:
           infile: coverage.out
           outfile: coverage.lcov
-        if: "matrix.os == 'ubuntu-latest'"
 
       - name: Coveralls
+        if: runner.os == 'Linux'
         uses: coverallsapp/github-action@v1.0.1
         with:
-          github-token: ${{ secrets.github_token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.lcov
-        if: "matrix.os == 'ubuntu-latest'"
