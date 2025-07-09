@@ -2,8 +2,6 @@ module github.com/ozsys/peekbt
 
 go 1.23.0
 
-toolchain go1.23.10
-
 require (
 	github.com/go-ble/ble v0.0.0-20240122180141-8c5522f54333
 	github.com/spf13/cobra v1.9.1
