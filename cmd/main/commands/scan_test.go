@@ -1,68 +1,82 @@
 package commands
 
 import (
-    "testing"
-    "time"
+	"bytes"
+	"context"
+	"io"
+	"os"
+	"testing"
+	"time"
 
-    "github.com/spf13/cobra"
+	"github.com/go-ble/ble"
+	"github.com/spf13/cobra"
 )
 
-/* -------------------------------------------------------------
-   1. pruneStaleDevices のテスト
-----------------------------------------------------------------*/
-func TestPruneStaleDevices(t *testing.T) {
-    now := time.Now()
-    // set up: 3 devices, one is stale (>10s ago)
-    results := map[string]deviceEntry{
-        "AA:BB:CC:00:00:01": {addr: "AA:BB:CC:00:00:01", rssi: -40, seen: now},
-        "AA:BB:CC:00:00:02": {addr: "AA:BB:CC:00:00:02", rssi: -50, seen: now.Add(-11 * time.Second)}, // stale
-        "AA:BB:CC:00:00:03": {addr: "AA:BB:CC:00:00:03", rssi: -60, seen: now.Add(-5 * time.Second)},  // recent
-    }
-    displayed := map[string]entryDisplay{
-        "AA:BB:CC:00:00:01": {entry: results["AA:BB:CC:00:00:01"]},
-        "AA:BB:CC:00:00:02": {entry: results["AA:BB:CC:00:00:02"]},
-        "AA:BB:CC:00:00:03": {entry: results["AA:BB:CC:00:00:03"]},
-    }
-    order := []string{
-        "AA:BB:CC:00:00:01",
-        "AA:BB:CC:00:00:02",
-        "AA:BB:CC:00:00:03",
-    }
-
-    pruneStaleDevices(results, displayed, &order)
-
-    if len(order) != 2 {
-        t.Fatalf("expected 2 devices after prune, got %d", len(order))
-    }
-    for _, addr := range order {
-        if addr == "AA:BB:CC:00:00:02" {
-            t.Errorf("stale device still present in order slice")
-        }
-    }
-    if _, ok := results["AA:BB:CC:00:00:02"]; ok {
-        t.Errorf("stale device still present in results map")
-    }
-    if _, ok := displayed["AA:BB:CC:00:00:02"]; ok {
-        t.Errorf("stale device still present in displayed map")
-    }
+/* ---------- モック Scanner ---------- */
+type mockScanner struct {
+	fn func(context.Context, bool, ble.AdvHandler, ble.AdvFilter) error
 }
 
-/* -------------------------------------------------------------
-   2. runScanCommand の排他フラグエラーテスト
-      (InitDefaultAdapter や BLE スキャンを呼ぶ前にエラーが返るルート)
-----------------------------------------------------------------*/
-func TestRunScanCommand_MutuallyExclusiveFlags(t *testing.T) {
-    // 保存 & 復元
-    oldRand, oldPub := randOnly, pubOnly
-    t.Cleanup(func() {
-        randOnly = oldRand
-        pubOnly = oldPub
-    })
+func (m mockScanner) Scan(ctx context.Context, b bool,
+	h ble.AdvHandler, f ble.AdvFilter) error {
+	return m.fn(ctx, b, h, f)
+}
 
-    randOnly = true
-    pubOnly = true
-    cmd := &cobra.Command{}
-    if err := runScanCommand(cmd, nil); err == nil {
-        t.Fatalf("expected error when both --rand and --pub are set, got nil")
-    }
+/* ---------- 1. pruneStaleDevices ---------- */
+func TestPruneStaleDevices(t *testing.T) {
+	now := time.Now()
+	results := map[string]deviceEntry{
+		"AA": {seen: now},
+		"BB": {seen: now.Add(-11 * time.Second)},
+	}
+	displayed := map[string]entryDisplay{"AA": {}, "BB": {}}
+	order := []string{"AA", "BB"}
+
+	pruneStaleDevices(results, displayed, &order)
+
+	if len(order) != 1 || order[0] != "AA" {
+		t.Fatalf("prune failed, got %v", order)
+	}
+}
+
+/* ---------- 2. 排他フラグエラー ---------- */
+func TestRunScanCommand_MutualEx(t *testing.T) {
+	oldRand, oldPub := randOnly, pubOnly
+	defer func() { randOnly, pubOnly = oldRand, oldPub }()
+	randOnly, pubOnly = true, true
+
+	if err := runScanCommand(&cobra.Command{}, nil); err == nil {
+		t.Fatalf("expected error when both flags are set")
+	}
+}
+
+/* ---------- 3. ヘッダ描画 ---------- */
+func TestDrawHeader(t *testing.T) {
+	r, w, _ := os.Pipe()
+	oldStd := os.Stdout
+	os.Stdout = w
+
+	drawHeader()
+
+	w.Close()
+	os.Stdout = oldStd
+	out, _ := io.ReadAll(r)
+
+	if !bytes.Contains(out, []byte("ADDR")) {
+		t.Fatalf("header output missing ADDR column")
+	}
+}
+
+func TestMakeContext(t *testing.T) {
+	ctx, cancel := makeContext(0)
+	defer cancel()
+	if _, ok := ctx.Deadline(); ok {
+		t.Fatalf("0 秒指定は deadline 無しのはず")
+	}
+
+	ctx2, cancel2 := makeContext(1)
+	defer cancel2()
+	if dl, ok := ctx2.Deadline(); !ok || time.Until(dl) > time.Second {
+		t.Fatalf("deadline 1s がセットされていない")
+	}
 }

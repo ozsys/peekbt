@@ -58,7 +58,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// フィルタを組み立てる
+	/*// フィルタを組み立てる
 	var advFilter ble.AdvFilter
 	switch {
 	case pubOnly:
@@ -75,7 +75,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
     }
 	default:
     	advFilter = nil
-	}
+	}*/
 
 	results := make(map[string]deviceEntry)
 	displayed := make(map[string]entryDisplay)
@@ -111,7 +111,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 	}()
 
 	// 実際のスキャン
-	err := ble.Scan(ctx, true, func(a ble.Advertisement) {
+	err := DefaultScanner.Scan(ctx, true, func(a ble.Advertisement) {
 		addr := a.Addr().String()
 		// フィルタ
 		firstOctet, _ := strconv.ParseUint(strings.Split(addr, ":")[0], 16, 8)
@@ -149,7 +149,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 		}
 		results[addr] = deviceEntry{addr, name, r, time.Now()}
 		mu.Unlock()
-	}, advFilter)
+	}, nil)
 
 	// 正常終了判定
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {

@@ -77,7 +77,7 @@ func scanAdvertisement(addr string, timeout time.Duration) (ble.Advertisement, e
 
 	ch := make(chan ble.Advertisement, 1)
 	go func() {
-		ble.Scan(ctx, true, func(a ble.Advertisement) {
+		DefaultScanner.Scan(ctx, true, func(a ble.Advertisement) {
 			if strings.EqualFold(a.Addr().String(), addr) {
 				select {
 				case ch <- a:
