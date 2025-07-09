@@ -32,7 +32,7 @@ jobs:
       # Linux だけテスト＋カバレッジ
       - name: Run tests & generate coverage
         if: runner.os == 'Linux'
-        run: just test -v
+        run: just test
 
       - name: Convert Coverage Format to LCOV
         if: runner.os == 'Linux'
