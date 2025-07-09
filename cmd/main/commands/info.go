@@ -1,7 +1,6 @@
 package commands
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"time"
 
 	"github.com/go-ble/ble"
-	"github.com/go-ble/ble/linux"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +39,7 @@ func runInfoCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	// BLE デバイス初期化
-	if err := initBLE(); err != nil {
+	if _, err := InitDefaultAdapter(); err != nil {
 		return err
 	}
 
@@ -72,19 +70,9 @@ func validateAddr(addr string) error {
 	return nil
 }
 
-// initBLE は BLE デバイスを初期化します
-func initBLE() error {
-	dev, err := linux.NewDevice()
-	if err != nil {
-		return fmt.Errorf("failed to initialize BLE device: %w", err)
-	}
-	ble.SetDefaultDevice(dev)
-	return nil
-}
-
 // scanAdvertisement はタイムアウト内に Addr が見つかるまでスキャンします
 func scanAdvertisement(addr string, timeout time.Duration) (ble.Advertisement, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := NewTimeoutCtx(int(timeout.Seconds()))
 	defer cancel()
 
 	ch := make(chan ble.Advertisement, 1)

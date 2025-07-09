@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/go-ble/ble"
-	"github.com/go-ble/ble/linux"
 	"github.com/spf13/cobra"
 )
 
@@ -55,8 +54,27 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	// BLEデバイス初期化
-	if err := initBLEDevice(); err != nil {
+	if _, err := InitDefaultAdapter(); err != nil {
 		return err
+	}
+
+	// フィルタを組み立てる
+	var advFilter ble.AdvFilter
+	switch {
+	case pubOnly:
+    	// MSB が 00xxxxxx → Public
+	    advFilter = func(a ble.Advertisement) bool {
+    		oct, _ := strconv.ParseUint(strings.Split(a.Addr().String(), ":")[0], 16, 8)
+    		return (oct & 0xC0) == 0x00
+    }
+	case randOnly:
+    // MSB が 1xxxxxxx → Random
+    	advFilter = func(a ble.Advertisement) bool {
+        	oct, _ := strconv.ParseUint(strings.Split(a.Addr().String(), ":")[0], 16, 8)
+        	return (oct & 0xC0) != 0x00
+    }
+	default:
+    	advFilter = nil
 	}
 
 	results := make(map[string]deviceEntry)
@@ -65,7 +83,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 	var mu sync.Mutex
 
 	// コンテキスト作成
-	ctx, cancel := makeContext(scanTime)
+	ctx, cancel := NewTimeoutCtx(scanTime)
 	defer cancel()
 
 	// 終了キー監視
@@ -131,7 +149,7 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 		}
 		results[addr] = deviceEntry{addr, name, r, time.Now()}
 		mu.Unlock()
-	}, nil)
+	}, advFilter)
 
 	// 正常終了判定
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
@@ -139,15 +157,6 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 	return err
-}
-
-func initBLEDevice() error {
-	dev, err := linux.NewDevice()
-	if err != nil {
-		return fmt.Errorf("failed to initialize BLE device: %v", err)
-	}
-	ble.SetDefaultDevice(dev)
-	return nil
 }
 
 func makeContext(seconds int) (context.Context, context.CancelFunc) {
