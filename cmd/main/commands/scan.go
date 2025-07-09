@@ -59,23 +59,23 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 	}
 
 	/*// フィルタを組み立てる
-	var advFilter ble.AdvFilter
-	switch {
-	case pubOnly:
-    	// MSB が 00xxxxxx → Public
-	    advFilter = func(a ble.Advertisement) bool {
-    		oct, _ := strconv.ParseUint(strings.Split(a.Addr().String(), ":")[0], 16, 8)
-    		return (oct & 0xC0) == 0x00
-    }
-	case randOnly:
-    // MSB が 1xxxxxxx → Random
-    	advFilter = func(a ble.Advertisement) bool {
-        	oct, _ := strconv.ParseUint(strings.Split(a.Addr().String(), ":")[0], 16, 8)
-        	return (oct & 0xC0) != 0x00
-    }
-	default:
-    	advFilter = nil
-	}*/
+		var advFilter ble.AdvFilter
+		switch {
+		case pubOnly:
+	    	// MSB が 00xxxxxx → Public
+		    advFilter = func(a ble.Advertisement) bool {
+	    		oct, _ := strconv.ParseUint(strings.Split(a.Addr().String(), ":")[0], 16, 8)
+	    		return (oct & 0xC0) == 0x00
+	    }
+		case randOnly:
+	    // MSB が 1xxxxxxx → Random
+	    	advFilter = func(a ble.Advertisement) bool {
+	        	oct, _ := strconv.ParseUint(strings.Split(a.Addr().String(), ":")[0], 16, 8)
+	        	return (oct & 0xC0) != 0x00
+	    }
+		default:
+	    	advFilter = nil
+		}*/
 
 	results := make(map[string]deviceEntry)
 	displayed := make(map[string]entryDisplay)

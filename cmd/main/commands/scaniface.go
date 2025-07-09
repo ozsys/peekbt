@@ -15,7 +15,7 @@ type Scanner interface {
 type bleScanner struct{}
 
 func (bleScanner) Scan(ctx context.Context, allowDup bool,
-		h ble.AdvHandler, f ble.AdvFilter) error {
+	h ble.AdvHandler, f ble.AdvFilter) error {
 	return ble.Scan(ctx, allowDup, h, f)
 }
 
