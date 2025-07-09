@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -14,27 +15,6 @@ import (
 	"github.com/go-ble/ble/linux"
 	"github.com/spf13/cobra"
 )
-
-// deviceEntry holds the basic scan result
-// entryDisplay holds display state for a device
-// scanTime is the scan duration in seconds
-var (
-	scanTime int
-)
-
-// scanCommand represents the 'scan' CLI command
-var scanCommand = &cobra.Command{
-	Use:   "scan",
-	Short: "Scan for nearby Bluetooth devices.",
-	RunE:  runScanCommand,
-}
-
-func init() {
-	scanCommand.Flags().IntP("time", "t", 0, "Scan time in seconds (0 = infinite)")
-	scanCommand.Flags().Bool("rand", false, "Random address only")
-	scanCommand.Flags().Bool("pub", false, "Public address only")
-	rootCommand.AddCommand(scanCommand)
-}
 
 type deviceEntry struct {
 	addr string
@@ -46,99 +26,78 @@ type deviceEntry struct {
 type entryDisplay struct {
 	entry     deviceEntry
 	colorTTL  time.Time // until when to display in green
-	highlight string    // "all" for full line, "rssi" for RSSI only
+	highlight string    // "all" for new device
+}
+
+var (
+	scanTime int
+	randOnly bool
+	pubOnly  bool
+)
+
+var scanCommand = &cobra.Command{
+	Use:   "scan",
+	Short: "Scan for nearby Bluetooth devices.",
+	RunE:  runScanCommand,
+}
+
+func init() {
+	scanCommand.Flags().IntVarP(&scanTime, "time", "t", 0, "Scan time in seconds (0 = infinite)")
+	scanCommand.Flags().BoolVar(&randOnly, "rand", false, "Random address only.")
+	scanCommand.Flags().BoolVar(&pubOnly, "pub", false, "Public address only.")
+	rootCommand.AddCommand(scanCommand)
 }
 
 func runScanCommand(cmd *cobra.Command, args []string) error {
-	// フラグ取得
-	scanTime, _ = cmd.Flags().GetInt("time")
-	randOnly, _ := cmd.Flags().GetBool("rand")
-	pubOnly, _ := cmd.Flags().GetBool("pub")
+	// 排他フラグチェック
 	if randOnly && pubOnly {
 		return fmt.Errorf("flags --rand and --pub are mutually exclusive")
 	}
 
-	// BLE デバイス初期化
-	dev, err := linux.NewDevice()
-	if err != nil {
-		return fmt.Errorf("failed to initialize BLE device: %v", err)
+	// BLEデバイス初期化
+	if err := initBLEDevice(); err != nil {
+		return err
 	}
-	ble.SetDefaultDevice(dev)
 
-	// 内部データ構造
 	results := make(map[string]deviceEntry)
 	displayed := make(map[string]entryDisplay)
 	order := make([]string, 0, 16)
 	var mu sync.Mutex
 
-	// コンテキスト準備
-	var ctx context.Context
-	var cancel context.CancelFunc
-	if scanTime == 0 {
-		ctx, cancel = context.WithCancel(context.Background())
-	} else {
-		ctx, cancel = context.WithTimeout(context.Background(), time.Duration(scanTime)*time.Second)
-	}
+	// コンテキスト作成
+	ctx, cancel := makeContext(scanTime)
 	defer cancel()
 
-	// 無限スキャン時は 'e'+Enter で終了
-	if scanTime == 0 {
-		go func() {
-			fmt.Println("Scanning... (press 'e' + Enter to exit)")
-			r := bufio.NewReader(cmd.InOrStdin())
-			for {
-				line, _ := r.ReadString('\n')
-				if strings.TrimSpace(line) == "e" {
-					cancel()
-					return
-				}
-			}
-		}()
-	} else {
-		fmt.Printf("Scanning for %d seconds...\n", scanTime)
-	}
+	// 終了キー監視
+	handleUserCancel(scanTime, cancel)
 
-	// 初回描画
+	// --- 最初に一度だけクリア＆ヘッダを描画 ---
 	fmt.Print("\033[2J\033[H")
-	fmt.Println("ADDR                 RSSI   NAME")
-	fmt.Println(strings.Repeat("-", 50))
+	drawHeader()
 
-	// 描画ループ
+	// 描画ループ開始
 	go func() {
+		ticker := time.NewTicker(200 * time.Millisecond)
+		defer ticker.Stop()
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			default:
+			case <-ticker.C:
 				mu.Lock()
-				for i, addr := range order {
-					d := displayed[addr]
-					colS, colE := "", ""
-					if time.Now().Before(d.colorTTL) {
-						colS, colE = "\033[32m", "\033[0m"
-					}
-					// カーソル移動＆上書き
-					fmt.Printf("\033[%d;0H", i+4)
-					if d.highlight == "all" {
-						fmt.Printf("%s%-20s %-6d %-20s%s", colS, d.entry.addr, d.entry.rssi, d.entry.name, colE)
-					} else {
-						fmt.Printf("%-20s %-6d %-20s", d.entry.addr, d.entry.rssi, d.entry.name)
-					}
-					fmt.Print("\033[K")
-				}
+				pruneStaleDevices(results, displayed, &order)
+				drawBody(displayed, order)
 				mu.Unlock()
-				time.Sleep(200 * time.Millisecond)
 			}
 		}
 	}()
 
-	// スキャン実行
-	err = ble.Scan(ctx, true, func(a ble.Advertisement) {
+	// 実際のスキャン
+	err := ble.Scan(ctx, true, func(a ble.Advertisement) {
 		addr := a.Addr().String()
-		// フィルタリング
-		oct := strings.Split(addr, ":")[0]
-		first, _ := strconv.ParseUint(oct, 16, 8)
-		isPub := (first & 0xC0) == 0x00
+		// フィルタ
+		firstOctet, _ := strconv.ParseUint(strings.Split(addr, ":")[0], 16, 8)
+		isPub := firstOctet&0xC0 == 0x00
 		if pubOnly && !isPub {
 			return
 		}
@@ -152,24 +111,105 @@ func runScanCommand(cmd *cobra.Command, args []string) error {
 		}
 
 		mu.Lock()
+		// 新規デバイスなら順序追加＆ハイライト「all」
 		if _, seen := results[addr]; !seen {
 			order = append(order, addr)
+			displayed[addr] = entryDisplay{
+				entry:     deviceEntry{addr, name, r, time.Now()},
+				colorTTL:  time.Now().Add(1 * time.Second),
+				highlight: "all",
+			}
+		} else {
+			// 更新のみ
+			results[addr] = deviceEntry{addr, name, r, time.Now()}
+			// colorTTL は新規時のみ設定
+			displayed[addr] = entryDisplay{
+				entry:     results[addr],
+				colorTTL:  displayed[addr].colorTTL,
+				highlight: "",
+			}
 		}
 		results[addr] = deviceEntry{addr, name, r, time.Now()}
-		hi := ""
-		if old, seen := displayed[addr]; !seen {
-			hi = "all"
-		} else if old.entry.rssi != r {
-			hi = "rssi"
-		}
-		displayed[addr] = entryDisplay{results[addr], time.Now().Add(1 * time.Second), hi}
 		mu.Unlock()
 	}, nil)
 
 	// 正常終了判定
 	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-		fmt.Println()
+		fmt.Println() // 最後に改行だけ入れる
 		return nil
 	}
 	return err
+}
+
+func initBLEDevice() error {
+	dev, err := linux.NewDevice()
+	if err != nil {
+		return fmt.Errorf("failed to initialize BLE device: %v", err)
+	}
+	ble.SetDefaultDevice(dev)
+	return nil
+}
+
+func makeContext(seconds int) (context.Context, context.CancelFunc) {
+	if seconds == 0 {
+		return context.WithCancel(context.Background())
+	}
+	return context.WithTimeout(context.Background(), time.Duration(seconds)*time.Second)
+}
+
+func handleUserCancel(seconds int, cancel context.CancelFunc) {
+	if seconds == 0 {
+		go func() {
+			fmt.Println("Scanning... (press 'e' + Enter to exit)")
+			r := bufio.NewReader(os.Stdin)
+			for {
+				line, _ := r.ReadString('\n')
+				if strings.TrimSpace(line) == "e" {
+					cancel()
+					return
+				}
+			}
+		}()
+	} else {
+		fmt.Printf("Scanning for %d seconds...\n", seconds)
+	}
+}
+
+// drawHeader はヘッダ部のみ描画
+func drawHeader() {
+	fmt.Println("ADDR                 RSSI   NAME")
+	fmt.Println(strings.Repeat("-", 50))
+}
+
+// drawBody はヘッダ下から各行を上書き
+func drawBody(displayed map[string]entryDisplay, order []string) {
+	for i, addr := range order {
+		disp := displayed[addr]
+		entry := disp.entry
+		colS, colE := "", ""
+		// 新規デバイスのみ緑ハイライト
+		if disp.highlight == "all" && time.Now().Before(disp.colorTTL) {
+			colS, colE = "\033[32m", "\033[0m"
+		}
+		// ヘッダ２行分をスキップして i+3 行目へ移動
+		fmt.Printf("\033[%d;0H", i+3)
+		fmt.Printf("%s%-20s %-6d %-20s%s", colS, entry.addr, entry.rssi, entry.name, colE)
+		// 行末クリア
+		fmt.Print("\033[K")
+	}
+}
+
+// pruneStaleDevices は最後受信から10秒経過したデバイスを削除
+func pruneStaleDevices(results map[string]deviceEntry, displayed map[string]entryDisplay, order *[]string) {
+	cutoff := time.Now().Add(-10 * time.Second)
+	newOrder := (*order)[:0]
+	for _, addr := range *order {
+		if ent, ok := results[addr]; ok && ent.seen.After(cutoff) {
+			newOrder = append(newOrder, addr)
+		} else {
+			delete(results, addr)
+			delete(displayed, addr)
+		}
+	}
+	*order = newOrder
 }

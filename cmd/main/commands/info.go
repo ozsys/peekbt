@@ -15,21 +15,100 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// infoCommand represents the 'info' CLI command
-var infoCommand = &cobra.Command{
+var (
+	infoTimeout int
+	infoJSON    string
+)
+
+func init() {
+	infoCmd.Flags().IntVarP(&infoTimeout, "timeout", "t", 10, "Scan timeout in seconds")
+	infoCmd.Flags().StringVarP(&infoJSON, "json", "j", "", "Write JSON output to the specified file")
+	rootCommand.AddCommand(infoCmd)
+}
+
+var infoCmd = &cobra.Command{
 	Use:   "info [flags] <ADDR>",
 	Short: "Show detailed information for a specific Bluetooth device.",
 	Args:  cobra.ExactArgs(1),
 	RunE:  runInfoCommand,
 }
 
-func init() {
-	infoCommand.Flags().IntP("timeout", "t", 10, "Scan timeout in seconds")
-	infoCommand.Flags().StringP("json", "j", "", "Write JSON output to the specified file")
-	rootCommand.AddCommand(infoCommand)
+// runInfoCommand はフラグ取得と各処理の呼び出しだけを行います
+func runInfoCommand(cmd *cobra.Command, args []string) error {
+	addr := strings.ToLower(args[0])
+	if err := validateAddr(addr); err != nil {
+		return err
+	}
+
+	// BLE デバイス初期化
+	if err := initBLE(); err != nil {
+		return err
+	}
+
+	// アドバタイズ取得
+	fmt.Printf("Scanning for device %s (timeout %ds)...\n", addr, infoTimeout)
+	adv, err := scanAdvertisement(addr, time.Duration(infoTimeout)*time.Second)
+	if err != nil {
+		return err
+	}
+
+	// 構造体組み立て
+	info := buildDeviceInfo(adv)
+
+	// JSON or Key:Value
+	if infoJSON != "" {
+		return writeJSON(info, infoJSON)
+	}
+	printInfo(info)
+	return nil
 }
 
-// deviceInfo holds the output structure
+// validateAddr は引数がMACアドレス形式かをチェックします
+func validateAddr(addr string) error {
+	pat := regexp.MustCompile(`^([0-9a-f]{2}:){5}[0-9a-f]{2}$`)
+	if !pat.MatchString(addr) {
+		return fmt.Errorf("invalid address format: %s", addr)
+	}
+	return nil
+}
+
+// initBLE は BLE デバイスを初期化します
+func initBLE() error {
+	dev, err := linux.NewDevice()
+	if err != nil {
+		return fmt.Errorf("failed to initialize BLE device: %w", err)
+	}
+	ble.SetDefaultDevice(dev)
+	return nil
+}
+
+// scanAdvertisement はタイムアウト内に Addr が見つかるまでスキャンします
+func scanAdvertisement(addr string, timeout time.Duration) (ble.Advertisement, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+
+	ch := make(chan ble.Advertisement, 1)
+	go func() {
+		ble.Scan(ctx, true, func(a ble.Advertisement) {
+			if strings.EqualFold(a.Addr().String(), addr) {
+				select {
+				case ch <- a:
+					cancel()
+				default:
+				}
+			}
+		}, nil)
+	}()
+
+	select {
+	case adv := <-ch:
+		return adv, nil
+	case <-ctx.Done():
+		return nil, fmt.Errorf("device %s not found within %v", addr, timeout)
+	}
+}
+
+// deviceInfo は出力用の構造体
 type deviceInfo struct {
 	Address      string   `json:"address"`
 	AddressType  string   `json:"addressType"`
@@ -40,8 +119,39 @@ type deviceInfo struct {
 	Connectable  bool     `json:"connectable"`
 }
 
-// outputInformation prints key: value format for non-JSON output
-func outputInformation(info deviceInfo) {
+// buildDeviceInfo は Advertisement から deviceInfo を組み立てます
+func buildDeviceInfo(a ble.Advertisement) deviceInfo {
+	uuids := a.Services()
+	s := make([]string, len(uuids))
+	for i, u := range uuids {
+		s[i] = u.String()
+	}
+	return deviceInfo{
+		Address:      a.Addr().String(),
+		AddressType:  getAddressType(a.Addr().String()),
+		Name:         a.LocalName(),
+		RSSI:         a.RSSI(),
+		ServicesUUID: s,
+		LastSeen:     time.Now().Format(time.RFC3339),
+		Connectable:  a.Connectable(),
+	}
+}
+
+// writeJSON は JSON 形式でファイルに書き出します
+func writeJSON(info deviceInfo, file string) error {
+	data, err := json.MarshalIndent(info, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal JSON: %w", err)
+	}
+	data = append(data, '\n')
+	if err := os.WriteFile(file, data, 0o644); err != nil {
+		return fmt.Errorf("failed to write JSON file: %w", err)
+	}
+	return nil
+}
+
+// printInfo は key: value 形式で標準出力します
+func printInfo(info deviceInfo) {
 	fmt.Printf("Address        : %s\n", info.Address)
 	fmt.Printf("Address Type   : %s\n", info.AddressType)
 	fmt.Printf("Name           : %s\n", info.Name)
@@ -51,10 +161,10 @@ func outputInformation(info deviceInfo) {
 	fmt.Printf("Connectable    : %t\n", info.Connectable)
 }
 
-// getAddressType returns the address type based on the MSBs of the first octet
+// getAddressType はアドレスの MSB から種別を返します
 func getAddressType(addrStr string) string {
-	firstOctet, _ := strconv.ParseUint(strings.Split(addrStr, ":")[0], 16, 8)
-	switch firstOctet & 0xC0 {
+	b, _ := strconv.ParseUint(strings.Split(addrStr, ":")[0], 16, 8)
+	switch b & 0xC0 {
 	case 0x00:
 		return "Public"
 	case 0x40:
@@ -65,94 +175,5 @@ func getAddressType(addrStr string) string {
 		return "Static Random"
 	default:
 		return "Unknown"
-	}
-}
-
-func runInfoCommand(cmd *cobra.Command, args []string) error {
-	// 引数とフラグの取得
-	addr := strings.ToLower(args[0])
-	macPattern := regexp.MustCompile(`^([0-9a-f]{2}:){5}[0-9a-f]{2}$`)
-	if !macPattern.MatchString(addr) {
-		return fmt.Errorf("invalid address format: %s", args[0])
-	}
-	tout, _ := cmd.Flags().GetInt("timeout")
-	jsonFile, _ := cmd.Flags().GetString("json")
-
-	// BLE デバイス初期化
-	dev, err := linux.NewDevice()
-	if err != nil {
-		return fmt.Errorf("failed to initialize BLE device: %v", err)
-	}
-	ble.SetDefaultDevice(dev)
-
-	// スキャン開始メッセージ
-	fmt.Printf("Scanning for device %s (timeout %ds)...\n", addr, tout)
-
-	// スキャンしてアドバタイズ取得
-	adv, err := findAdvertisementByAddr(addr, time.Duration(tout)*time.Second)
-	if err != nil {
-		return err
-	}
-
-	// 情報整形
-	addrStr := adv.Addr().String()
-	addrType := getAddressType(addrStr)
-	bleServices := adv.Services()
-	svcStrs := make([]string, len(bleServices))
-	for i, u := range bleServices {
-		svcStrs[i] = u.String()
-	}
-
-	info := deviceInfo{
-		Address:      addrStr,
-		AddressType:  addrType,
-		Name:         adv.LocalName(),
-		RSSI:         adv.RSSI(),
-		ServicesUUID: svcStrs,
-		LastSeen:     time.Now().Format(time.RFC3339),
-		Connectable:  adv.Connectable(),
-	}
-
-	// JSON出力または標準出力
-	if jsonFile != "" {
-		data, err := json.MarshalIndent(info, "", "  ")
-		if err != nil {
-			return fmt.Errorf("failed to marshal JSON: %v", err)
-		}
-		// ファイル末尾に改行を付加
-		data = append(data, '\n')
-		if err := os.WriteFile(jsonFile, data, 0644); err != nil {
-			return fmt.Errorf("failed to write JSON file: %v", err)
-		}
-		return nil
-	}
-
-	outputInformation(info)
-	return nil
-}
-
-// findAdvertisementByAddr scans up to timeout and returns the first match
-func findAdvertisementByAddr(addr string, timeout time.Duration) (ble.Advertisement, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-
-	result := make(chan ble.Advertisement, 1)
-	go func() {
-		ble.Scan(ctx, true, func(a ble.Advertisement) {
-			if strings.EqualFold(a.Addr().String(), addr) {
-				select {
-				case result <- a:
-					cancel()
-				default:
-				}
-			}
-		}, nil)
-	}()
-
-	select {
-	case adv := <-result:
-		return adv, nil
-	case <-ctx.Done():
-		return nil, fmt.Errorf("device %s not found within %v", addr, timeout)
 	}
 }
