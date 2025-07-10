@@ -1,0 +1,8 @@
+# docs/config.toml
+baseURL = "https://ozsys.github.io/peekbt/"
+languageCode = "ja"
+title = "Welcome to PEEKBT!"
+
+[module]
+  [[module.imports]]
+    path = "github.com/halogenica/beautifulhugo"
