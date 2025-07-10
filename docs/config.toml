@@ -6,3 +6,6 @@ title = "Welcome to PEEKBT!"
 [module]
   [[module.imports]]
     path = "github.com/halogenica/beautifulhugo"
+    
+[params]
+  customCSS = ["css/custom.css"]
