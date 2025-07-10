@@ -101,7 +101,7 @@ jobs:
           just make_distribution_files
           just upload_assets v${{ steps.vars.outputs.tag }}
 
-    docker:
+  docker:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     permissions:
