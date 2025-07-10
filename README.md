@@ -13,18 +13,29 @@ You can filter scan results, inspect devices in detail, and log their activity f
 peek <COMMAND> [OPTIONS]...
 COMMAND
     scan                  Scan nearby Bluetooth devices
-    info    <ADDR>        Show device information
-    export  [JSON_FILE]   Export results
+    info       <ADDR>     Show device information
 OPTIONS
-    -rand                 Random address only.
-    -pub                  Public address only.
-    -lim    <INT>         Limit the number of displayed devices.
+    --rand                Random address only.
+    --pub                 Public address only.
+    -t, --time <INT>      Scan duration in seconds.
+    -j, --json <FILENAME> Write device information in JSON format to <FILENAME> (only available with the "info")command)          
+
+    --help                Print help message and usage.
 ADDR
-    The target Bluetooth device address. (e.g. XX:XX:XX:XX:XX:XX)
-JSON_FILE
-    The output file for exported scan data.
+    The target Bluetooth device address. (e.g. 01:23:45:67:89:AB)
 ```
 
-## Installation
+## Example
+```
+# 5秒間スキャンし、結果をターミナルに表示
+peekbt scan -t 5
 
-## About
+# 15秒間スキャンしてパブリックアドレスのみ表示
+peekbt scan -t 15 --pub
+
+# MACアドレスを指定して詳細情報を取得（標準出力）
+peekbt info 01:23:45:67:89:AB
+
+# 詳細情報を JSON ファイルに書き出し
+peekbt info -j device-info.json 01:23:45:67:89:AB
+```
