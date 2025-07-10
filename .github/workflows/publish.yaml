@@ -84,7 +84,8 @@ jobs:
       - name: Release 作成
         id: create_release
         uses: actions/create-release@v1
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.vars.outputs.tag }}
           release_name: Release v${{ steps.vars.outputs.tag }}
@@ -96,7 +97,8 @@ jobs:
         with: { fetch-depth: 0 }
 
       - name: 配布ファイル生成 & アップロード
-        env: { GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} }
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           just make_distribution_files
           just upload_assets v${{ steps.vars.outputs.tag }}
