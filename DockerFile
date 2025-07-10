@@ -1,6 +1,4 @@
-# ────────────────────────
-# 1st stage : build binary
-# ────────────────────────
+
 FROM golang:1.23.9-bullseye AS builder
 RUN apt-get update && apt-get upgrade -y && apt-get clean
 RUN apt-get install -y bluetooth bluez libbluetooth-dev
@@ -14,9 +12,6 @@ COPY . .
 # 静的リンク (musl libc) にしたいなら CGO_ENABLED=0 もここで指定
 RUN go build -o peekbt ./cmd/main
 
-# ────────────────────────
-# 2nd stage : slim runtime
-# ────────────────────────
 FROM alpine:latest
 ARG VERSION=0.2.5
 LABEL org.opencontainers.image.source="https://github.com/ozsys/peekbt" \
