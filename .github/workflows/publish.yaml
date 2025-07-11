@@ -1,126 +1,92 @@
 name: publish
 
 # ────────────────────────────────
-# ① トリガ
-#    * main への PR が merge されたとき
-#    * vX.Y.Z タグを push したとき
-#    * main への push でもトリガー
+# トリガー
+#  • main ブランチへの push
+#  • vX.Y.Z タグの push
 # ────────────────────────────────
-
 on:
-  pull_request:
-    branches: [main]
-    types: [closed]
   push:
-    branches: [main]        
-    tags: ["v*"]
+    branches:
+      - main
+    tags:
+      - 'v*'
 
-# ────────────────────────────────
-# ② PR merge 時の処理
-# ────────────────────────────────
 jobs:
-  setup:
-    if:  >
-      ( github.event_name == 'pull_request'
-        && startsWith(github.head_ref, 'releases/v')
-        && github.event.pull_request.merged == true
-      )
-      || 
-      ( github.event_name == 'push'
-        && github.ref == 'refs/heads/main'
-      )
+  # ────────────────────────────────
+  # ① main ブランチへの push
+  #    • 配布ファイル生成だけ行う
+  # ────────────────────────────────
+  publish-main:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
-    outputs:
-      tag: ${{ steps.vars.outputs.tag }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-
     steps:
-      - name: 取得したタグ名を抽出
-        id: vars
-        run: echo "tag=${GITHUB_HEAD_REF##*/v}" >> "$GITHUB_OUTPUT"
-
-      - name: Release を作成
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: チェックアウト
+        uses: actions/checkout@v4
         with:
-          tag_name: v${{ steps.vars.outputs.tag }}
-          release_name: Release v${{ steps.vars.outputs.tag }}
+          fetch-depth: 0
 
-  publish:
-    needs: setup          # ← setup が実行された時だけ走る
-    if: needs.setup.result == 'success'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: extractions/setup-just@v3
-        with: { just-version: "1.40.0" }
-
-      - uses: actions/checkout@v4
-        with: { ref: main, fetch-depth: 0 }
+      - name: Just をセットアップ
+        uses: extractions/setup-just@v3
+        with:
+          just-version: '1.40.0'
 
       - name: 配布ファイル生成 & アップロード
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           just make_distribution_files
-          just upload_assets v${{ needs.setup.outputs.tag }}
+          just upload_assets latest
 
-# ────────────────────────────────
-# ③ タグ push 版（Release & Docker イメージ生成）
-# ────────────────────────────────
+  # ────────────────────────────────
+  # ② vX.Y.Z タグ push
+  #    • Release 作成
+  #    • 配布ファイル生成
+  #    • Docker イメージビルド／プッシュ
+  # ────────────────────────────────
   release-tag:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
-
-    outputs:
-      tag: ${{ steps.vars.outputs.tag }}
 
     steps:
       - name: Version 抽出
         id: vars
-        run: echo "tag=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "tag=${GITHUB_REF#refs/tags/v}" >>"$GITHUB_OUTPUT"
 
-      - name: Release 作成
-        id: create_release
+      - name: Release を作成
         uses: actions/create-release@v1
-        env: 
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ steps.vars.outputs.tag }}
           release_name: Release v${{ steps.vars.outputs.tag }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: extractions/setup-just@v3
-        with: { just-version: "1.40.0" }
+      - name: チェックアウト
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+      - name: Just をセットアップ
+        uses: extractions/setup-just@v3
+        with:
+          just-version: '1.40.0'
 
       - name: 配布ファイル生成 & アップロード
-        env: 
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           just make_distribution_files
           just upload_assets v${{ steps.vars.outputs.tag }}
 
-# ────────────────────────────────
-# ④ Docker イメージ build/push
-#    * タグ push 時のみ実行
-# ────────────────────────────────
-  docker:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    permissions:
-      packages: write
-      contents: read
-    steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Extract metadata (tags, labels)
+
+      - name: メタデータ抽出 (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -129,15 +95,15 @@ jobs:
             type=raw,value=latest
             type=sha,format=short
             type=raw,value=${{ github.ref_name }}
-      - name: Login to GitHub Container Registry
+
+      - name: GitHub Container Registry ログイン
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Checkout the project
-        uses: actions/checkout@v4
-      - name: Build and push Docker image
+
+      - name: Docker イメージ build/push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -148,3 +114,4 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=ghcr.io/ozsys/peekbt:buildcache
           cache-to: type=registry,ref=ghcr.io/ozsys/peekbt:buildcache,mode=max
+          
