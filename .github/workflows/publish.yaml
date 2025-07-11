@@ -32,12 +32,14 @@ jobs:
           just-version: '1.40.0'
 
       - name: 「latest」リリースがなければ作成
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release view latest || gh release create latest --draft
 
       - name: 配布ファイル生成 & アップロード
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           just make_distribution_files
           just upload_assets latest
