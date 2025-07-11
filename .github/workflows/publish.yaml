@@ -20,7 +20,15 @@ on:
 # ────────────────────────────────
 jobs:
   setup:
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'releases/v') && github.event.pull_request.merged == true
+    if:  >
+      ( github.event_name == 'pull_request'
+        && startsWith(github.head_ref, 'releases/v')
+        && github.event.pull_request.merged == true
+      )
+      || 
+      ( github.event_name == 'push'
+        && github.ref == 'refs/heads/main'
+      )
     runs-on: ubuntu-latest
 
     outputs:
