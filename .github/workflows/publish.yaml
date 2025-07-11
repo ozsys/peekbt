@@ -4,16 +4,19 @@ name: publish
 # ① トリガ
 #    * main への PR が merge されたとき
 #    * vX.Y.Z タグを push したとき
+#    * main への push でもトリガー
 # ────────────────────────────────
+
 on:
   pull_request:
     branches: [main]
     types: [closed]
   push:
+    branches: [main]        
     tags: ["v*"]
 
 # ────────────────────────────────
-# ② PR を閉じたとき（release ブランチ → main）版
+# ② PR merge 時の処理
 # ────────────────────────────────
 jobs:
   setup:
