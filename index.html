@@ -1,8 +1,8 @@
 
 
 <!DOCTYPE html>
-<html lang="ja" itemscope itemtype="http://schema.org/WebPage">
-  <head>
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head><script src="/peekbt/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=peekbt/livereload" data-no-instant defer></script>
     
 
   <meta charset="utf-8" />
@@ -13,23 +13,79 @@
 
 
   
-  <meta name="description" content="ようこそ peekbt ドキュメントサイトへ
-ここでは peekbt の使い方やインストール手順、各コマンドの詳細をまとめています。
-左上のメニューから「使い方」や「About」など、気になるページへどうぞ。">
-  <meta name="author" content="Some Person"/><script type="application/ld+json">
+  <meta name="description" content="peekbtについて
+peekbt は Linux / Raspberry Pi / Ubuntu 向けに作られた
+シンプル &amp; 高速な Bluetooth CLI ツールです。
+topコマンドのように1画面を更新し続けるようになっているのでログを遡ってデバイスの情報を見る手間が減ります。
+
+BLE / Classic の両方をスキャンに対応しています
+RSSI・アドレス種別・サービス UUID などを表示できます
+JSON 形式での出力にも対応しています
+
+
+
+インストール &amp; セットアップ
+# 実行にはbluetooth bluez libbluetooth-devが必要です
+sudo apt-get update
+sudo apt-get install -y bluetooth bluez libbluetooth-dev
+
+go install github.com/ozsys/peekbt/cmd/main@latest \
+  &amp;&amp; mv &#34;$(go env GOPATH)/bin/main&#34; &#34;$(go env GOPATH)/bin/peekbt&#34;
+
+# 実行パスに $GOBIN もしくは ~/go/bin が通っているか確認
+peekbt --help
+
+クイックスタート
+
+  
+      
+          操作
+          コマンド例
+          補足
+      
+  
+  
+      
+          10 秒間スキャン
+          peekbt scan -t 10
+          アドレス・RSSI を一覧表示
+      
+      
+          ランダムアドレスのみ
+          peekbt scan --rand
+          MSB 0xC0 ビット判定
+      
+      
+          端末詳細
+          peekbt info AA:BB:CC:DD:EE:FF
+          サービス UUID・TxPower 等
+      
+      
+          JSON で保存
+          peekbt scan -t 30 | tee devices.json
+          解析ツールへパイプ可能
+      
+  
+
+
+主なコマンド
+scan
+近くのデバイスを連続スキャンし、端末を行単位で更新表示します。
+表示する情報はデバイスアドレス、RSSI、デバイス名です(デバイス名はついていなければno nameになります)。
+新規デバイスは緑色でハイライトされます。"><script type="application/ld+json">
 {
     "@context": "http://schema.org",
     "@type": "WebSite",
-    "name": "PEEKBT",
+    "name": "Welcome to PEEKBT!",
     
-    "url": "https:\/\/ozsys.github.io\/peekbt\/"
+    "url": "http:\/\/localhost:1313\/peekbt\/"
 }
 </script><script type="application/ld+json">
 {
   "@context": "http://schema.org",
   "@type": "Organization",
   "name": "",
-  "url": "https:\/\/ozsys.github.io\/peekbt\/"
+  "url": "http:\/\/localhost:1313\/peekbt\/"
   
   
   
@@ -37,32 +93,86 @@
 }
 </script>
 
-<meta property="og:title" content="ホーム" />
-<meta property="og:description" content="ようこそ peekbt ドキュメントサイトへ
-ここでは peekbt の使い方やインストール手順、各コマンドの詳細をまとめています。
-左上のメニューから「使い方」や「About」など、気になるページへどうぞ。">
-<meta property="og:image" content="https://ozsys.github.io/peekbt/img/avatar-icon.png" />
-<meta property="og:url" content="https://ozsys.github.io/peekbt/" />
+<meta property="og:title" content="peekbt" />
+<meta property="og:description" content="peekbtについて
+peekbt は Linux / Raspberry Pi / Ubuntu 向けに作られた
+シンプル &amp; 高速な Bluetooth CLI ツールです。
+topコマンドのように1画面を更新し続けるようになっているのでログを遡ってデバイスの情報を見る手間が減ります。
+
+BLE / Classic の両方をスキャンに対応しています
+RSSI・アドレス種別・サービス UUID などを表示できます
+JSON 形式での出力にも対応しています
+
+
+
+インストール &amp; セットアップ
+# 実行にはbluetooth bluez libbluetooth-devが必要です
+sudo apt-get update
+sudo apt-get install -y bluetooth bluez libbluetooth-dev
+
+go install github.com/ozsys/peekbt/cmd/main@latest \
+  &amp;&amp; mv &#34;$(go env GOPATH)/bin/main&#34; &#34;$(go env GOPATH)/bin/peekbt&#34;
+
+# 実行パスに $GOBIN もしくは ~/go/bin が通っているか確認
+peekbt --help
+
+クイックスタート
+
+  
+      
+          操作
+          コマンド例
+          補足
+      
+  
+  
+      
+          10 秒間スキャン
+          peekbt scan -t 10
+          アドレス・RSSI を一覧表示
+      
+      
+          ランダムアドレスのみ
+          peekbt scan --rand
+          MSB 0xC0 ビット判定
+      
+      
+          端末詳細
+          peekbt info AA:BB:CC:DD:EE:FF
+          サービス UUID・TxPower 等
+      
+      
+          JSON で保存
+          peekbt scan -t 30 | tee devices.json
+          解析ツールへパイプ可能
+      
+  
+
+
+主なコマンド
+scan
+近くのデバイスを連続スキャンし、端末を行単位で更新表示します。
+表示する情報はデバイスアドレス、RSSI、デバイス名です(デバイス名はついていなければno nameになります)。
+新規デバイスは緑色でハイライトされます。">
+<meta property="og:url" content="http://localhost:1313/peekbt/" />
 <meta property="og:type" content="website" />
-<meta property="og:site_name" content="PEEKBT" />
+<meta property="og:site_name" content="Welcome to PEEKBT!" />
 
-  <meta name="twitter:title" content="ホーム" />
-  <meta name="twitter:description" content="ようこそ peekbt ドキュメントサイトへ
-ここでは peekbt の使い方やインストール手順、各コマンドの詳細をまとめています。
-左上のメニューから「使い方」や「About」など、気になるページへどうぞ。">
-  <meta name="twitter:image" content="https://ozsys.github.io/peekbt/img/avatar-icon.png" />
+  <meta name="twitter:title" content="peekbt" />
+  <meta name="twitter:description" content="peekbtについて
+peekbt は Linux / Raspberry Pi / Ubuntu 向けに作られた
+シンプル &amp; 高速な Bluetooth CLI ツールです。
+topコマンドのように1画面を更新し続けるようになっているのでログを遡ってデバイスの情報を見る手間が減ります。
+
+BLE / Classic の両方をスキャンに対応しています
+RSSI・アドレス種別・サー …">
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@username" />
-  <meta name="twitter:creator" content="@username" />
-  <link href='https://ozsys.github.io/peekbt/img/favicon.ico' rel='icon' type='image/x-icon'/>
   <meta name="generator" content="Hugo 0.147.8">
-  <link rel="alternate" href="https://ozsys.github.io/peekbt/index.xml" type="application/rss+xml" title="PEEKBT"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
+  <link rel="alternate" href="http://localhost:1313/peekbt/index.xml" type="application/rss+xml" title="Welcome to PEEKBT!"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.6.0/css/all.css" integrity="sha384-h/hnnw1Bi4nbpD6kE7nYfCXzovi622sY5WBxww8ARKwpdLj5kUWjRuyiXaD1U2JT" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"><link rel="stylesheet" href="https://ozsys.github.io/peekbt/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
-  <link rel="stylesheet" href="https://ozsys.github.io/peekbt/css/highlight.min.css" /><link rel="stylesheet" href="https://ozsys.github.io/peekbt/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"><link rel="stylesheet" href="http://localhost:1313/peekbt/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="http://localhost:1313/peekbt/css/syntax.css" /><link rel="stylesheet" href="http://localhost:1313/peekbt/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous">
-
 
   </head>
   <body>
@@ -70,49 +180,16 @@
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
-        <span class="sr-only">メニューを切り替え</span>
+        <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="https://ozsys.github.io/peekbt/">PEEKBT</a>
+      <a class="navbar-brand" href="http://localhost:1313/peekbt/">Welcome to PEEKBT!</a>
     </div>
 
     <div class="collapse navbar-collapse" id="main-navbar">
       <ul class="nav navbar-nav navbar-right">
-        
-          
-            <li>
-              <a title="Blog" href="/peekbt/">Blog</a>
-            </li>
-          
-        
-          
-            <li class="navlinks-container">
-              <a class="navlinks-parent" role="button" tabindex="0">Samples</a>
-              <div class="navlinks-children">
-                
-                  <a href="/peekbt/post/2017-03-07-bigimg-sample">Big Image Sample</a>
-                
-                  <a href="/peekbt/post/2017-03-05-math-sample">Math Sample</a>
-                
-                  <a href="/peekbt/post/2016-03-08-code-sample">Code Sample</a>
-                
-              </div>
-            </li>
-          
-        
-          
-            <li>
-              <a title="About" href="/peekbt/page/about/">About</a>
-            </li>
-          
-        
-          
-            <li>
-              <a title="Tags" href="/peekbt/tags">Tags</a>
-            </li>
-          
         
 
         
@@ -121,15 +198,6 @@
       </ul>
     </div>
 
-    
-      <div class="avatar-container">
-        <div class="avatar-img-border">
-          <a title="PEEKBT" href="https://ozsys.github.io/peekbt/">
-            <img class="avatar-img" src="https://ozsys.github.io/peekbt/img/avatar-icon.png" alt="PEEKBT" />
-           
-          </a>
-        </div>
-      </div>
     
 
   </div>
@@ -206,15 +274,11 @@
           <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
             <div class="page-heading">
               
-                <h1>PEEKBT</h1>
+                <h1>Welcome to PEEKBT!</h1>
               
               
                 <hr class="small">
               
-              
-                
-                  <span class="page-subheading">Build a beautiful and simple website in minutes</span>
-                
               
               
             </div>
@@ -232,55 +296,193 @@
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
         
           <div class="well">
-            <h1 id="ようこそ-peekbt-ドキュメントサイトへ">ようこそ <code>peekbt</code> ドキュメントサイトへ</h1>
-<p>ここでは <strong>peekbt</strong> の使い方やインストール手順、各コマンドの詳細をまとめています。<br>
-左上のメニューから「使い方」や「About」など、気になるページへどうぞ。</p>
+            <h1 id="peekbtについて">peekbtについて</h1>
+<p>peekbt は <strong>Linux / Raspberry Pi / Ubuntu</strong> 向けに作られた<br>
+シンプル &amp; 高速な Bluetooth CLI ツールです。
+topコマンドのように1画面を更新し続けるようになっているのでログを遡ってデバイスの情報を見る手間が減ります。</p>
+<ul>
+<li><strong>BLE / Classic</strong> の両方をスキャンに対応しています</li>
+<li>RSSI・アドレス種別・サービス UUID などを表示できます</li>
+<li>JSON 形式での出力にも対応しています</li>
+</ul>
+<h2></h2>
+<hr>
+<h2 id="インストール--セットアップ">インストール &amp; セットアップ</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e"># 実行にはbluetooth bluez libbluetooth-devが必要です</span>
+</span></span><span style="display:flex;"><span>sudo apt-get update
+</span></span><span style="display:flex;"><span>sudo apt-get install -y bluetooth bluez libbluetooth-dev
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>go install github.com/ozsys/peekbt/cmd/main@latest <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>  <span style="color:#f92672">&amp;&amp;</span> mv <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>go env GOPATH<span style="color:#66d9ef">)</span><span style="color:#e6db74">/bin/main&#34;</span> <span style="color:#e6db74">&#34;</span><span style="color:#66d9ef">$(</span>go env GOPATH<span style="color:#66d9ef">)</span><span style="color:#e6db74">/bin/peekbt&#34;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># 実行パスに $GOBIN もしくは ~/go/bin が通っているか確認</span>
+</span></span><span style="display:flex;"><span>peekbt --help
+</span></span></code></pre></div><hr>
+<h2 id="クイックスタート">クイックスタート</h2>
+<table>
+  <thead>
+      <tr>
+          <th>操作</th>
+          <th>コマンド例</th>
+          <th>補足</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>10 秒間スキャン</td>
+          <td><code>peekbt scan -t 10</code></td>
+          <td>アドレス・RSSI を一覧表示</td>
+      </tr>
+      <tr>
+          <td>ランダムアドレスのみ</td>
+          <td><code>peekbt scan --rand</code></td>
+          <td>MSB 0xC0 ビット判定</td>
+      </tr>
+      <tr>
+          <td>端末詳細</td>
+          <td><code>peekbt info AA:BB:CC:DD:EE:FF</code></td>
+          <td>サービス UUID・TxPower 等</td>
+      </tr>
+      <tr>
+          <td>JSON で保存</td>
+          <td><code>peekbt scan -t 30 | tee devices.json</code></td>
+          <td>解析ツールへパイプ可能</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h2 id="主なコマンド">主なコマンド</h2>
+<h3 id="scan"><code>scan</code></h3>
+<p>近くのデバイスを連続スキャンし、端末を行単位で更新表示します。<br>
+表示する情報はデバイスアドレス、RSSI、デバイス名です(デバイス名はついていなければ<strong>no name</strong>になります)。<br>
+新規デバイスは緑色でハイライトされます。</p>
+<h4 id="オプション">オプション</h4>
+<p>オプションでアドレスタイプの指定ができます。</p>
+<ul>
+<li><code>--time, -t &lt;INT&gt;</code> — スキャン時間(デフォルト10s)</li>
+<li><code>--rand</code> — ランダムアドレスのみ</li>
+<li><code>--pub</code>  — パブリックアドレスのみ</li>
+</ul>
+<blockquote>
+<p>[!NOTE]
+パブリックアドレスはアドレス上位1桁が0〜3で始まるアドレスです。<br>
+ランダムアドレスはアドレス上位1桁が4〜Fで始まるアドレスです。</p></blockquote>
+<h3 id="info"><code>info</code></h3>
+<p>指定アドレスをアクティブスキャンし、アドレスがヒットした場合はアドバタイズパケットを元に情報を提示します。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>peekbt info AA:BB:CC:DD:EE:FF
+</span></span></code></pre></div><h4 id="オプション-1">オプション</h4>
+<p>オプションでアドレスタイプの指定ができます。</p>
+<ul>
+<li><code>--time, -t &lt;INT&gt;</code> — スキャン時間(デフォルト10s)</li>
+<li><code>--json, -j &lt;FILENAME&gt;</code> — FILENAMEを指定してjson形式で出力</li>
+</ul>
+<h4 id="peekbt-scan-の実行結果の例"><code>peekbt scan</code> の実行結果の例</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>Scanning <span style="color:#66d9ef">for</span> device fb:2f:14:22:80:2f <span style="color:#f92672">(</span>timeout 10s<span style="color:#f92672">)</span>...
+</span></span><span style="display:flex;"><span>Address        : fb:2f:14:22:80:2f
+</span></span><span style="display:flex;"><span>Address Type   : Static Random
+</span></span><span style="display:flex;"><span>Name           : 
+</span></span><span style="display:flex;"><span>RSSI           : -45 dBm
+</span></span><span style="display:flex;"><span>Services UUIDs : <span style="color:#f92672">[]</span>
+</span></span><span style="display:flex;"><span>Last Seen      : 2025-07-11T01:27:19+09:00
+</span></span><span style="display:flex;"><span>Connectable    : false
+</span></span></code></pre></div><h4 id="peekbt-scan-のスキャン結果について"><code>peekbt scan</code> のスキャン結果について</h4>
+<p><code>peekbt scan</code> を実行すると、検出されたBluetoothデバイスの情報が以下のように表示されます。</p>
+<table>
+  <thead>
+      <tr>
+          <th style="text-align: left">表示項目</th>
+          <th style="text-align: left">説明</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td style="text-align: left"><strong><code>Address</code></strong></td>
+          <td style="text-align: left">検出したデバイスのMACアドレスです。(例: <code>AA:BB:CC:DD:EE:FF</code>)</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong><code>Address Type</code></strong></td>
+          <td style="text-align: left">デバイスのアドレス種別です。以下の4種類があります。<code>public</code>, <code>Resolvable Private</code>, <code>non-Resolvable Private</code>, <code>Static Random</code></td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong><code>Name</code></strong></td>
+          <td style="text-align: left">デバイスに設定されている名称です。（空の場合もあります）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong><code>RSSI</code></strong></td>
+          <td style="text-align: left">受信電波の強度です (単位: dBm)。<!-- raw HTML omitted -->数値が <code>0</code> に近いほど、電波が強いことを示します。</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong><code>Services UUIDs</code></strong></td>
+          <td style="text-align: left">デバイスが提供しているサービスのUUIDリストです。（なければ <code>[]</code> と表示されます）</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong><code>Last Seen</code></strong></td>
+          <td style="text-align: left">最後にデバイスを検出した時刻です。</td>
+      </tr>
+      <tr>
+          <td style="text-align: left"><strong><code>Connectable</code></strong></td>
+          <td style="text-align: left">そのデバイスに接続できるかどうかを <code>true</code> / <code>false</code> で示します。</td>
+      </tr>
+  </tbody>
+</table>
+<hr>
+<h4 id="json形式での出力">json形式での出力</h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$ peekbt info -j example.json fb:2f:14:22:80:2f
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ cat example.json 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;address&#34;</span>: <span style="color:#e6db74">&#34;fb:2f:14:22:80:2f&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;addressType&#34;</span>: <span style="color:#e6db74">&#34;Static Random&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;rssi&#34;</span>: -45,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;serviceUUIDs&#34;</span>: <span style="color:#f92672">[]</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;lastSeen&#34;</span>: <span style="color:#e6db74">&#34;2025-07-11T01:27:50+09:00&#34;</span>,
+</span></span><span style="display:flex;"><span>  <span style="color:#e6db74">&#34;connectable&#34;</span>: false
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span></code></pre></div><h2 id="peekbtの作成理由">peekbtの作成理由</h2>
+<p>peekbtを作成しようと思ったきっかけは<code>bluetoothctl</code>というコマンドが不便に感じたからです。<br>
+<code>bluetoothctl</code>は<code>connect</code>などの接続関連のUIは素晴らしいですが、デバイスのスキャンやデバイス情報に関しては不満点が残ります。<code>bluetoothctl</code>で<code>scan</code>を実行すると結果がログのように流れ続けるような仕様になっています。<br>
+そのため目的のデバイス情報が画面上部へどんどん流れていってしまい、見失ってしまいます。<br>
+以下は <code>bluetoothctl scan</code> を実行した際のログ例です。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>…
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>CHG<span style="color:#f92672">]</span> Device 00:1C:FC:B6:C4:EA RSSI: -61
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>CHG<span style="color:#f92672">]</span> Device 47:E0:1A:C5:A8:30 RSSI: -61
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>DEL<span style="color:#f92672">]</span> Device 71:27:2A:C7:EF:CA 71-27-2A-C7-EF-CA
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>CHG<span style="color:#f92672">]</span> Device 50:40:36:39:68:5C RSSI: -94
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>CHG<span style="color:#f92672">]</span> Device 70:E5:4E:CF:CF:7C RSSI: -76
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>NEW<span style="color:#f92672">]</span> Device 6B:1C:36:09:A6:74 6B-1C-36-09-A6-74
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>DEL<span style="color:#f92672">]</span> Device 67:99:86:A7:02:25 67-99-86-A7-02-25
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>CHG<span style="color:#f92672">]</span> Device 50:40:36:39:68:5C RSSI: -47
+</span></span><span style="display:flex;"><span><span style="color:#f92672">[</span>CHG<span style="color:#f92672">]</span> Device 70:E5:4E:CF:CF:7C RSSI: -84
+</span></span><span style="display:flex;"><span>…
+</span></span></code></pre></div><p>昨今、年間の出荷台数は50億台を突破し、bluetoothデバイスは身の回りに溢れています。そのためアドバタイジングパケットが無数に送信されており、目的のデバイスの情報がすぐに流れてしまい観察に不向きです。そのため<code>peekbt</code>では<code>scan</code>の情報はtopコマンドのように、terminalの画面内で更新するようにしました。</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ADDR                 RSSI   NAME
+</span></span><span style="display:flex;"><span>--------------------------------------------------
+</span></span><span style="display:flex;"><span>4f:35:62:ba:a2:09    -53    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>71:7e:87:f2:d2:e6    -63    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>12:57:42:3b:b9:f0    -73    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>6d:f6:9d:71:e9:2f    -63    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>64:38:bd:6c:5c:c5    -65    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>60:37:05:26:37:5c    -47    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>7f:0d:ae:e9:f4:37    -55    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>           
+</span></span><span style="display:flex;"><span>7a:4e:a3:2e:3c:e9    -63    <span style="color:#f92672">(</span>no name<span style="color:#f92672">)</span>  
+</span></span></code></pre></div><hr>
+<h2 id="peekbtの今後の発展">peekbtの今後の発展</h2>
+<ul>
+<li>接続に関するコマンドの実装</li>
+<li><code>info</code>で表示される情報量の増加(企業の固有番号の表示など)</li>
+<li><code>json</code>フォーマット以外での出力</li>
+<li>各コマンドのオプションの拡充</li>
+</ul>
+<hr>
+<h2 id="ライセンス">ライセンス</h2>
+<p>peekbtはMITライセンスの下で公開されています。</p>
 
           </div>
         
 
         <div class="posts-list">
           
-          
-            <article class="post-preview">
-    <a href="https://ozsys.github.io/peekbt/post/2025-06-20-how-to-use-scan/">
-        <h2 class="post-title"></h2>
-        
-        
-        
-    </a>
-
-    <p class="post-meta">
-        <span class="post-meta">
-  
-  
-  <i class="fas fa-calendar"></i>&nbsp;January 1, 0001に投稿
-  
-  
-    &nbsp;|&nbsp;<i class="fas fa-clock"></i>&nbsp;0&nbsp;分間
-  
-  
-    &nbsp;|&nbsp;<i class="fas fa-book"></i>&nbsp;0&nbsp;言葉
-  
-  
-    
-      &nbsp;|&nbsp;<i class="fas fa-user"></i>&nbsp;Some Person
-    
-  
-  
-</span>
-
-
-    </p>
-    <div class="post-entry">
-        
-        
-        
-    </div>
-
-    
-
-</article>
           
         </div>
 
@@ -304,334 +506,9 @@
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
         <ul class="list-inline text-center footer-links">
           
-              <li>
-		
-		  <a href="mailto:youremail@domain.com" title="Email me">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fas fa-envelope fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.facebook.com/username" title="Facebook">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-facebook fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://github.com/username" title="GitHub">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://gitlab.com/username" title="GitLab">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-gitlab fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://bitbucket.org/username" title="Bitbucket">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-bitbucket fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://twitter.com/username" title="Twitter">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-x-twitter fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://username.slack.com/" title="Slack">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-slack fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://reddit.com/u/username" title="Reddit">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-reddit-alien fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://linkedin.com/in/username" title="LinkedIn">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-linkedin fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.xing.com/profile/username" title="Xing">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-xing fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://stackoverflow.com/users/XXXXXXX/username" title="StackOverflow">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-stack-overflow fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.snapchat.com/add/username" title="Snapchat">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-snapchat-ghost fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.instagram.com/username" title="Instagram">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-instagram fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.youtube.com/user/username" title="Youtube">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-youtube fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://soundcloud.com/username" title="SoundCloud">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-soundcloud fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://open.spotify.com/user/username" title="Spotify">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-spotify fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://username.bandcamp.com/" title="Bandcamp">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-bandcamp fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://itch.io/profile/username" title="Itch.io">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fas fa-gamepad fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://vk.com/username" title="VK">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-vk fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://paypal.me/username" title="PayPal">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-paypal fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://telegram.me/username" title="Telegram">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-telegram fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://500px.com/username" title="500px">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-500px fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://codepen.io/username" title="CodePen">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-codepen fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.kaggle.com/username" title="kaggle">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-kaggle fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a rel="me"href="https://url" title="Mastodon">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-mastodon fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://weibo.com/username" title="Weibo">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-weibo fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://medium.com/@username" title="Medium">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-medium fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://discord.gg/invite%20code%20%28https://discord.gg/XXXXXXX%29" title="Discord">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-discord fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.strava.com/athletes/userid" title="Strava">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-strava fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://www.last.fm/user/username" title="Last.fm">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-lastfm fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-              <li>
-		
-		  <a href="https://bsky.app/profile/username" title="Bluesky">
-		
-                  <span class="fa-stack fa-lg">
-                    <i class="fas fa-circle fa-stack-2x"></i>
-                    <i class="fab fa-bluesky fa-stack-1x fa-inverse"></i>
-                  </span>
-                </a>
-              </li>
-          
-          
-          <li>
-            <a href="/peekbt/index.xml" title="RSS">
-              <span class="fa-stack fa-lg">
-                <i class="fas fa-circle fa-stack-2x"></i>
-                <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
-              </span>
-            </a>
-          </li>
-          
           
         </ul>
         <p class="credits copyright text-muted">
-          
-            
-              <a href="yourwebsite.com">Some Person</a>
-            
           
 
           &nbsp;&bull;&nbsp;&copy;
@@ -641,12 +518,12 @@
 
           
             &nbsp;&bull;&nbsp;
-            <a href="https://ozsys.github.io/peekbt/">PEEKBT</a>
+            <a href="http://localhost:1313/peekbt/">Welcome to PEEKBT!</a>
           
         </p>
         
         <p class="credits theme-by text-muted">
-          起動力に<a href="https://gohugo.io">Hugo v0.147.8</a> &nbsp;&bull;&nbsp; テーマに<a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a>に基づいている<a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          <a href="https://gohugo.io">Hugo v0.147.8</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
           
         </p>
       </div>
@@ -657,11 +534,8 @@
 <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha384-w5y/xIeYixWvfM+A1cEbmHPURnvyqmVg5eVENruEdDjcyRLUSNej7512JQGspFUr" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
 
-<script src="https://ozsys.github.io/peekbt/js/main.js"></script>
-<script src="https://ozsys.github.io/peekbt/js/highlight.min.js"></script>
-<script> hljs.initHighlightingOnLoad(); </script>
-<script> $(document).ready(function() {$("pre.chroma").css("padding","0");}); </script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="https://ozsys.github.io/peekbt/js/load-photoswipe.js"></script>
+<script src="http://localhost:1313/peekbt/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="http://localhost:1313/peekbt/js/load-photoswipe.js"></script>
 
 
 
