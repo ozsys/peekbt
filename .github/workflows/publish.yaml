@@ -61,15 +61,6 @@ jobs:
       - uses: actions/checkout@v4
         with: { ref: main, fetch-depth: 0 }
 
-      - name: Git submodule 初期化
-        run: |
-          git config --global user.name  "GitHub Actions"
-          git config --global user.email "action@github.com"
-          auth="$(git config --local --get http.https://github.com/.extraheader)"
-          git submodule sync --recursive
-          git -c "http.extraheader=$auth" -c protocol.version=2 \
-              submodule update --init --force --recursive --depth=1
-
       - name: 配布ファイル生成 & アップロード
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
